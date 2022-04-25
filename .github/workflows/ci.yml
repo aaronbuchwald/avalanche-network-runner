@@ -1,0 +1,23 @@
+name: Build + Unit Tests
+
+on:
+  push:
+
+jobs:
+  run_build_unit_tests:
+    name: build_unit_test
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v3
+      - uses: actions/setup-go@v2
+        with:
+          go-version: "1.17.9" # The Go version to download (if necessary) and use.
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v2
+        with:
+          version: latest
+          working-directory: .
+          args: --timeout 3m
+      - name: build_test
+        shell: bash
+        run: ./scripts/build_test.sh
