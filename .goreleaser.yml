@@ -1,6 +1,6 @@
 # ref. https://goreleaser.com/customization/build/
 builds:
-  - main: ./main
+  - main: ./cmd/avalanche-network-runner
     binary: avalanchego
     flags:
       - -v
