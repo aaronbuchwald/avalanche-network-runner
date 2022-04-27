@@ -47,12 +47,12 @@ func pingFunc(cmd *cobra.Command, args []string) error {
 	defer cli.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), requestTimeout)
-	resp, err := cli.Ping(ctx)
+	_, err = cli.Ping(ctx)
 	cancel()
 	if err != nil {
 		return err
 	}
 
-	zap.L().Info("Received ping", zap.String("res", resp))
+	zap.L().Info("Received ping")
 	return nil
 }
