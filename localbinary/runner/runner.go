@@ -19,7 +19,7 @@ import (
 )
 
 // Create and run a five node network
-func RunNetwork(ctx context.Context, args []string) error {
+func RunNetwork(ctx context.Context, args []string, networkCallback func(backend.Network) error) error {
 	fs := buildFlagSet()
 	v, err := buildViper(fs, args)
 	if err != nil {
@@ -32,11 +32,13 @@ func RunNetwork(ctx context.Context, args []string) error {
 	}
 	logrus.SetLevel(level)
 
-	registry := backend.NewExecutorRegistry(map[string]string{
-		constants.NormalExecution: v.GetString(avalanchegoBinaryPathKey),
+	orchestrator := localbinary.NewNetworkOrchestrator(&localbinary.OrchestratorConfig{
+		BaseDir: v.GetString(dataDirectoryKey),
+		Registry: map[string]string{
+			constants.NormalExecution: v.GetString(avalanchegoBinaryPathKey),
+		},
+		DestroyOnTeardown: v.GetBool(cleanDataDirKey),
 	})
-
-	orchestrator := localbinary.NewNetworkOrchestrator(v.GetString(dataDirectoryKey), registry, v.GetBool(cleanDataDirKey))
 	network, err := networks.NewDefaultLocalNetwork(ctx, orchestrator, constants.NormalExecution)
 	if err != nil {
 		return err
@@ -53,12 +55,22 @@ func RunNetwork(ctx context.Context, args []string) error {
 
 	logrus.Info("Network became healthy...\n")
 
-	nodes := network.GetNodes()
+	nodes, err := network.GetNodes()
+	if err != nil {
+		return err
+	}
 	sort.Slice(nodes, func(i, j int) bool {
 		return nodes[i].GetName() < nodes[j].GetName()
 	})
 	for _, node := range nodes {
 		logrus.Infof("%s available at %s.", node.GetName(), node.GetHTTPBaseURI())
+	}
+
+	// Run the callback on the created network if applicable
+	if networkCallback != nil {
+		if err := networkCallback(network); err != nil {
+			return err
+		}
 	}
 
 	// Run until the context is marked as done

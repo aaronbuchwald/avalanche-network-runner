@@ -1,6 +1,3 @@
-// Copyright (C) 2022, Ava Labs, Inc. All rights reserved.
-// See the file LICENSE for licensing terms.
-
 package main
 
 import (
@@ -13,7 +10,6 @@ import (
 	"github.com/aaronbuchwald/avalanche-network-runner/localbinary/runner"
 )
 
-// Create a five node local network and wait for SIGINT/SIGTERM to shut down the network
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
@@ -28,7 +24,7 @@ func main() {
 		cancel()
 	}()
 
-	if err := runner.RunNetwork(ctx, os.Args[1:]); err != nil {
+	if err := runner.RunNetwork(ctx, os.Args[1:], nil); err != nil {
 		fmt.Printf("network exited due to: %s\n", err)
 	}
 

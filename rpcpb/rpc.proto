@@ -1,0 +1,120 @@
+syntax = "proto3";
+
+option go_package = "github.com/aaronbuchwald/avalanche-network-runner;rpcpb";
+
+package rpcpb;
+
+import "google/api/annotations.proto";
+
+message PingRequest {}
+
+message PingResponse {
+  int32 pid = 1;
+}
+
+service PingService {
+  rpc Ping(PingRequest) returns (PingResponse) {
+    option (google.api.http) = {
+      post: "/v1/ping"
+      body: "*"
+    };
+  }
+}
+
+message NodeInfo {
+  string name = 1;
+  bytes config = 2;
+  string uri = 3;
+  string bootstrapip = 4;
+}
+
+message CreateNetworkRequest {
+  string network = 1;
+}
+
+message CreateNetworkResponse {}
+
+message GetNodesRequest {
+  string network = 1;
+}
+
+message GetNodesResponse {
+  repeated NodeInfo nodes = 1;
+}
+
+message GetNodeRequest {
+  string network = 1;
+  string name = 2;
+}
+
+message GetNodeResponse {
+  NodeInfo node = 1;
+}
+
+message AddNodeRequest {
+  string network = 1;
+  bytes config = 2;
+}
+
+message AddNodeResponse {
+  NodeInfo node = 1;
+}
+
+message TeardownRequest {
+  string network = 1;
+}
+
+message TeardownResponse {}
+
+message NodeStopRequest {
+  string network = 1;
+  string name = 2;
+  int64 timeout = 3;
+}
+
+message NodeStopResponse {}
+
+
+service OrchestratorService {
+  rpc CreateNetwork(CreateNetworkRequest) returns (CreateNetworkResponse) {
+    option (google.api.http) = {
+      post: "/v1/orchestrator/create"
+      body: "*"
+    };
+  }
+
+  rpc GetNodes(GetNodesRequest) returns (GetNodesResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/getNodes"
+      body: "*"
+    };
+  }
+
+  rpc GetNode(GetNodeRequest) returns (GetNodeResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/getNode"
+      body: "*"
+    };
+  }
+
+  rpc AddNode(AddNodeRequest) returns (AddNodeResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/add"
+      body: "*"
+    };
+  }
+
+  rpc Teardown(TeardownRequest) returns (TeardownResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/teardown"
+      body: "*"
+    };
+  }
+
+  rpc NodeStop(NodeStopRequest) returns (NodeStopResponse) {
+    option (google.api.http) = {
+      post: "/v1/network/stop"
+      body: "*"
+    };
+  }
+}
