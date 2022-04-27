@@ -9,7 +9,6 @@ import (
 	"time"
 
 	"github.com/aaronbuchwald/avalanche-network-runner/backend"
-	"github.com/aaronbuchwald/avalanche-network-runner/pkg/color"
 	"github.com/aaronbuchwald/avalanche-network-runner/rpcpb"
 	"github.com/sirupsen/logrus"
 	"google.golang.org/grpc"
@@ -49,7 +48,8 @@ func New(cfg Config) (Client, error) {
 	}
 	logrus.SetLevel(level)
 
-	color.Outf("{{blue}}dialing endpoint %q{{/}}\n", cfg.Endpoint)
+	logrus.Infof("Dialing endpoint %q", cfg.Endpoint)
+
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.DialTimeout)
 	conn, err := grpc.DialContext(
 		ctx,

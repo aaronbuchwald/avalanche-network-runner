@@ -8,8 +8,9 @@ import (
 	"time"
 
 	"github.com/aaronbuchwald/avalanche-network-runner/grpc/client"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 var (
@@ -26,7 +27,7 @@ func NewCommand() *cobra.Command {
 		RunE:  pingFunc,
 	}
 
-	cmd.PersistentFlags().StringVar(&logLevel, "log-level", logrus.InfoLevel.String(), "log level")
+	cmd.PersistentFlags().StringVar(&logLevel, "log-level", zapcore.InfoLevel.String(), "log level")
 	cmd.PersistentFlags().StringVar(&endpoint, "endpoint", "0.0.0.0:8080", "server endpoint")
 	cmd.PersistentFlags().DurationVar(&dialTimeout, "dial-timeout", 10*time.Second, "server dial timeout")
 	cmd.PersistentFlags().DurationVar(&requestTimeout, "request-timeout", 10*time.Second, "client request timeout")
@@ -52,6 +53,6 @@ func pingFunc(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	logrus.Infof("Received ping: %v", resp)
+	zap.L().Info("Received ping", zap.String("res", resp))
 	return nil
 }

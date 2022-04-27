@@ -92,7 +92,7 @@ func serverFunc(cmd *cobra.Command, args []string) (err error) {
 			logrus.Info("Closed server.")
 		}
 	case err = <-errc:
-		logrus.Warn("Closed server with error: %s", err)
+		logrus.Warnf("Closed server with error: %s", err)
 		rootCancel()
 	}
 	return err

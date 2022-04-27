@@ -9,7 +9,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -86,7 +86,7 @@ func (backend *networkBackend) AddNode(ctx context.Context, config NodeConfig) (
 		// We're going to return the original source of the error anyways.
 		go func() {
 			if err := node.Stop(10 * time.Second); err != nil {
-				logrus.Errorf("failed to stop node under duplicate name %s", config.Name)
+				zap.L().Error("failed to stop node", zap.String("name", config.Name))
 			}
 		}()
 		return nil, fmt.Errorf("cannot create duplicate node under name: %s", config.Name)
