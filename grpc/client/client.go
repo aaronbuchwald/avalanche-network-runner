@@ -10,7 +10,9 @@ import (
 
 	"github.com/aaronbuchwald/avalanche-network-runner/backend"
 	"github.com/aaronbuchwald/avalanche-network-runner/rpcpb"
-	"github.com/sirupsen/logrus"
+	"github.com/aaronbuchwald/avalanche-network-runner/utils/log"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 )
@@ -42,13 +44,13 @@ type client struct {
 }
 
 func New(cfg Config) (Client, error) {
-	level, err := logrus.ParseLevel(cfg.LogLevel)
+	level, err := zapcore.ParseLevel(cfg.LogLevel)
 	if err != nil {
 		return nil, err
 	}
-	logrus.SetLevel(level)
+	log.SetGlobalLogLevel(level)
 
-	logrus.Infof("Dialing endpoint %q", cfg.Endpoint)
+	zap.L().Info("Dialing grpc server", zap.String("endpoint", cfg.Endpoint))
 
 	ctx, cancel := context.WithTimeout(context.Background(), cfg.DialTimeout)
 	conn, err := grpc.DialContext(
@@ -77,7 +79,7 @@ func New(cfg Config) (Client, error) {
 }
 
 func (c *client) Ping(ctx context.Context) (*rpcpb.PingResponse, error) {
-	logrus.Info("Sending ping")
+	zap.L().Info("Sending ping...")
 
 	// ref. https://grpc-ecosystem.github.io/grpc-gateway/docs/tutorials/adding_annotations/
 	// curl -X POST -k http://localhost:8081/v1/ping -d ''

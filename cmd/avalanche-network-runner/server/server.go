@@ -13,8 +13,10 @@ import (
 	"github.com/aaronbuchwald/avalanche-network-runner/grpc/server"
 	"github.com/aaronbuchwald/avalanche-network-runner/localbinary"
 	"github.com/aaronbuchwald/avalanche-network-runner/utils/constants"
-	"github.com/sirupsen/logrus"
+	"github.com/aaronbuchwald/avalanche-network-runner/utils/log"
 	"github.com/spf13/cobra"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 )
 
 func init() {
@@ -38,7 +40,7 @@ func NewCommand() *cobra.Command {
 		RunE:  serverFunc,
 	}
 
-	cmd.PersistentFlags().StringVar(&logLevel, "log-level", logrus.InfoLevel.String(), "Log level to use for the server.")
+	cmd.PersistentFlags().StringVar(&logLevel, "log-level", zapcore.InfoLevel.String(), "Log level to use for the server.")
 	cmd.PersistentFlags().StringVar(&port, "port", ":8080", "server port")
 	cmd.PersistentFlags().StringVar(&gwPort, "grpc-gateway-port", ":8081", "grpc-gateway server port")
 	cmd.PersistentFlags().DurationVar(&dialTimeout, "dial-timeout", 10*time.Second, "server dial timeout")
@@ -50,11 +52,11 @@ func NewCommand() *cobra.Command {
 }
 
 func serverFunc(cmd *cobra.Command, args []string) (err error) {
-	level, err := logrus.ParseLevel(logLevel)
+	level, err := zapcore.ParseLevel(logLevel)
 	if err != nil {
 		return err
 	}
-	logrus.SetLevel(level)
+	log.SetGlobalLogLevel(level)
 
 	orchestrator := localbinary.NewNetworkOrchestrator(&localbinary.OrchestratorConfig{
 		BaseDir: orchestratorBaseDir,
@@ -83,16 +85,16 @@ func serverFunc(cmd *cobra.Command, args []string) (err error) {
 	signal.Notify(sigc, syscall.SIGINT, syscall.SIGTERM)
 	select {
 	case sig := <-sigc:
-		logrus.Warnf("signal %v received; closing server", sig)
+		zap.L().Warn("signal received; closing server", zap.String("signal", sig.String()))
 		rootCancel()
 		err := <-errc
 		if err != nil {
-			logrus.Warnf("Error while closing server: %s", err)
+			zap.L().Warn("closing server", zap.Error(err))
 		} else {
-			logrus.Info("Closed server.")
+			zap.L().Info("Closed server.")
 		}
 	case err = <-errc:
-		logrus.Warnf("Closed server with error: %s", err)
+		zap.L().Warn("closing server", zap.Error(err))
 		rootCancel()
 	}
 	return err

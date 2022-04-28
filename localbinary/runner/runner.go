@@ -9,13 +9,15 @@ import (
 	"sort"
 	"time"
 
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
+	"go.uber.org/zap/zapcore"
 
 	"github.com/aaronbuchwald/avalanche-network-runner/backend"
 	"github.com/aaronbuchwald/avalanche-network-runner/e2e"
 	"github.com/aaronbuchwald/avalanche-network-runner/localbinary"
 	"github.com/aaronbuchwald/avalanche-network-runner/networks"
 	"github.com/aaronbuchwald/avalanche-network-runner/utils/constants"
+	"github.com/aaronbuchwald/avalanche-network-runner/utils/log"
 )
 
 // Create and run a five node network
@@ -26,11 +28,11 @@ func RunNetwork(ctx context.Context, args []string, networkCallback func(backend
 		return err
 	}
 
-	level, err := logrus.ParseLevel(v.GetString(logLevelKey))
+	level, err := zapcore.ParseLevel(v.GetString(logLevelKey))
 	if err != nil {
 		return fmt.Errorf("couldn't parse log level: %w", err)
 	}
-	logrus.SetLevel(level)
+	log.SetGlobalLogLevel(level)
 
 	orchestrator := localbinary.NewNetworkOrchestrator(&localbinary.OrchestratorConfig{
 		BaseDir: v.GetString(dataDirectoryKey),
@@ -45,7 +47,7 @@ func RunNetwork(ctx context.Context, args []string, networkCallback func(backend
 	}
 	defer func() {
 		if err := orchestrator.Teardown(context.Background()); err != nil {
-			logrus.Errorf("Failed to tear down network orchestrator due to %s\n", err)
+			zap.L().Error("Failed to tear down network orchestrator", zap.Error(err))
 		}
 	}()
 
@@ -53,7 +55,7 @@ func RunNetwork(ctx context.Context, args []string, networkCallback func(backend
 		return err
 	}
 
-	logrus.Info("Network became healthy...\n")
+	zap.L().Info("Network became health...")
 
 	nodes, err := network.GetNodes()
 	if err != nil {
@@ -63,7 +65,7 @@ func RunNetwork(ctx context.Context, args []string, networkCallback func(backend
 		return nodes[i].GetName() < nodes[j].GetName()
 	})
 	for _, node := range nodes {
-		logrus.Infof("%s available at %s.", node.GetName(), node.GetHTTPBaseURI())
+		zap.L().Info("Node became available", zap.String("name", node.GetName()), zap.String("URI", node.GetHTTPBaseURI()))
 	}
 
 	// Run the callback on the created network if applicable

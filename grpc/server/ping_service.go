@@ -8,7 +8,7 @@ import (
 	"os"
 
 	"github.com/aaronbuchwald/avalanche-network-runner/rpcpb"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 type PingServiceHandler struct {
@@ -16,6 +16,6 @@ type PingServiceHandler struct {
 }
 
 func (h *PingServiceHandler) Ping(ctx context.Context, in *rpcpb.PingRequest) (*rpcpb.PingResponse, error) {
-	logrus.Debugf("Received ping message.")
+	zap.L().Debug("Received ping message.")
 	return &rpcpb.PingResponse{Pid: int32(os.Getpid())}, nil
 }

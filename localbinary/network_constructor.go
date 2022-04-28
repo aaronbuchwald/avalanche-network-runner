@@ -14,7 +14,7 @@ import (
 	"github.com/aaronbuchwald/avalanche-network-runner/backend"
 	"github.com/aaronbuchwald/avalanche-network-runner/utils"
 	"github.com/ava-labs/avalanchego/config"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 var _ backend.NetworkConstructor = &networkConstructor{}
@@ -59,7 +59,7 @@ func (c *networkConstructor) AddNode(ctx context.Context, nodeDef backend.NodeCo
 		return nil, fmt.Errorf("failed to marshal node config: %w", err)
 	}
 
-	logrus.Infof("Starting node %s with %s with config: \n%v\n", nodeDef.Name, nodeDef.Executable, string(nodeConfigBytes))
+	zap.L().Info("Starting node", zap.String("name", nodeDef.Name), zap.String("executable", nodeDef.Executable), zap.String("config", string(nodeConfigBytes)))
 	cmdParams := []string{
 		"./avalanchego",
 		fmt.Sprintf("--%s=%s", config.ConfigContentKey, base64.StdEncoding.EncodeToString(nodeConfigBytes)),

@@ -8,9 +8,9 @@ import (
 	"strings"
 
 	"github.com/aaronbuchwald/avalanche-network-runner/utils/constants"
-	"github.com/sirupsen/logrus"
 	"github.com/spf13/pflag"
 	"github.com/spf13/viper"
+	"go.uber.org/zap/zapcore"
 )
 
 const (
@@ -28,7 +28,7 @@ func buildFlagSet() *flag.FlagSet {
 
 func addLocalBinaryFlags(fs *flag.FlagSet) {
 	fs.String(dataDirectoryKey, constants.BaseDataDir, "This flag sets the data directory where the Avalanche Network Runner stores network data.")
-	fs.String(logLevelKey, logrus.InfoLevel.String(), "Sets the log level of the Avalanche Network Runner.")
+	fs.String(logLevelKey, zapcore.InfoLevel.String(), "Sets the log level of the Avalanche Network Runner.")
 	fs.String(avalanchegoBinaryPathKey, constants.AvalancheGoBinary, "Sets the path to the AvalancheGo binary.")
 	fs.Bool(cleanDataDirKey, false, "If enabled, the data directory will be wiped after the network runner exits.")
 }

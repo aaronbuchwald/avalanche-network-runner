@@ -11,8 +11,8 @@ import (
 	"github.com/aaronbuchwald/avalanche-network-runner/backend"
 	"github.com/aaronbuchwald/avalanche-network-runner/networks"
 	"github.com/aaronbuchwald/avalanche-network-runner/utils/constants"
-	"github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
+	"go.uber.org/zap"
 )
 
 // TestNetworkOrchestrator tests that [orchestator] can be used to construct the default local network and wait for all of the clients
@@ -20,7 +20,7 @@ import (
 func TestNetworkOrchestrator(ctx context.Context, t *testing.T, orchestrator backend.NetworkOrchestrator) {
 	assert := assert.New(t)
 
-	logrus.Info("Creating default local network")
+	zap.L().Info("Creating default local network")
 	network, err := networks.NewDefaultLocalNetwork(ctx, orchestrator, constants.NormalExecution)
 	if err != nil {
 		t.Fatal(err)

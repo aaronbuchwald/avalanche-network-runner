@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 
 	"github.com/aaronbuchwald/avalanche-network-runner/backend"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 var _ backend.OrchestratorBackend = &orchestrator{}
@@ -47,7 +47,7 @@ func NewNetworkOrchestrator(config *OrchestratorConfig) backend.NetworkOrchestra
 }
 
 func (o *orchestrator) CreateNetworkConstructor(name string) (backend.NetworkConstructor, error) {
-	logrus.Infof("Creating network under name: %s", name)
+	zap.L().Info("Creating network", zap.String("name", name))
 	constructor := newNetworkConstructor(filepath.Join(o.orchestratorBaseDir, name), o.registry)
 	return constructor, nil
 }

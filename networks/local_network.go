@@ -11,7 +11,7 @@ import (
 	"github.com/aaronbuchwald/avalanche-network-runner/backend"
 	"github.com/aaronbuchwald/avalanche-network-runner/utils/constants"
 	"github.com/ava-labs/avalanchego/config"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 	"golang.org/x/sync/errgroup"
 )
 
@@ -26,7 +26,7 @@ func NewDefaultLocalNetwork(ctx context.Context, orchestrator backend.NetworkOrc
 	defer func() {
 		if err != nil {
 			if err := network.Teardown(ctx); err != nil {
-				logrus.Errorf("Failed to tear down network after failing to start local network: %s", err)
+				zap.L().Error("Failed to tear down network after failing to start local network", zap.Error(err))
 			}
 		}
 	}()
@@ -60,7 +60,7 @@ func NewDefaultLocalNetwork(ctx context.Context, orchestrator backend.NetworkOrc
 
 	if err := eg.Wait(); err != nil {
 		if teardownErr := network.Teardown(ctx); err != nil {
-			logrus.Errorf("failed to teardown network due to %s after wait group errored with %s", teardownErr, err)
+			zap.L().Error("failed to tear down network after wait group errored", zap.NamedError("teardownErr", teardownErr), zap.Error(err))
 		}
 		return nil, err
 	}

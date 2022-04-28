@@ -11,7 +11,7 @@ import (
 
 	"github.com/aaronbuchwald/avalanche-network-runner/backend"
 	"github.com/ava-labs/avalanchego/config"
-	"github.com/sirupsen/logrus"
+	"go.uber.org/zap"
 )
 
 var _ backend.Node = &node{}
@@ -41,9 +41,9 @@ func newNode(cmd *exec.Cmd, nodeDef backend.NodeConfig) (*node, error) {
 	go func() {
 		err := cmd.Wait()
 		if err != nil {
-			logrus.Errorf("node %s stopped with error: %s", nodeDef.Name, err)
+			zap.L().Error("node stopped", zap.Error(err))
 		} else {
-			logrus.Debugf("node %s stopped.", nodeDef.Name)
+			zap.L().Debug("node stopped", zap.String("name", nodeDef.Name))
 		}
 
 		node.stopErr = err
